@@ -28,18 +28,18 @@ gmail_app_password = os.environ.get("PASSWORD")
 send_from = os.environ.get("EMAIL")
 
 
-def send_mailer(sender, body, subject="Attendance Alert"):
-    try:
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-            server.ehlo()
-            server.login(gmail_user, gmail_app_password)
-            message = f"Subject: {subject}\n\n{body}"
-            server.sendmail(send_from, sender, message)
-        print('Email sent!')
-    except smtplib.SMTPAuthenticationError:
-        print("Error: SMTP authentication failed! Please check your credentials.")
-    except smtplib.SMTPException as e:
-        print(f"Error: Failed to send email. {e}")
+# def send_mailer(sender, body, subject="Attendance Alert"):
+#     try:
+#         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+#             server.ehlo()
+#             server.login(gmail_user, gmail_app_password)
+#             message = f"Subject: {subject}\n\n{body}"
+#             server.sendmail(send_from, sender, message)
+#         print('Email sent!')
+#     except smtplib.SMTPAuthenticationError:
+#         print("Error: SMTP authentication failed! Please check your credentials.")
+#     except smtplib.SMTPException as e:
+#         print(f"Error: Failed to send email. {e}")
 
 
 @app.post('/sendmaillees')
@@ -169,6 +169,7 @@ def getdata():
         "ids": list(unique_ids),
         "unique_dates": list(unique_dates)
     }, 200
+
 
 @app.route('/attendance', methods=['POST'])
 def success():
@@ -432,4 +433,3 @@ def today_attendance():
 
 port = int(os.environ.get('PORT', 5000))
 app.run(debug=True, host='0.0.0.0', port=port)
-
