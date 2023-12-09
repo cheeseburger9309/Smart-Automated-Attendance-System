@@ -10,6 +10,17 @@ function CaptureForm() {
   const [email, setEmail] = useState("");
   const [rollno, setRollno] = useState("");
   const [images, setImages] = useState([]);
+  const [progress, setProgress] = useState(0);
+
+  const webcamRef = useRef(null);
+
+  const captureImage = () => {
+    const imageSrc = webcamRef.current.getScreenshot();
+    if (images.length < 5) {
+      setImages([...images, imageSrc]);
+      setProgress(((images.length + 1) / 5) * 100);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,7 +63,26 @@ function CaptureForm() {
     }
   };
 
-  const dataURItoBlob = (dataURI) => {};
+  const dataURItoBlob = (dataURI) => {
+    const byteString = atob(dataURI.split(",")[1]);
+    const mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    const blob = new Blob([ab], { type: mimeString });
+    return blob;
+  };
+
+  const gradientPercentage = Math.min(progress, 100);
+  useEffect(() => {
+    if (start) {
+      const parentCamera = document.querySelector(".parent-camera");
+      const gradientColor = `linear-gradient(90deg, #A6F6FF ${gradientPercentage}%, #ccc ${gradientPercentage}%)`;
+      parentCamera.style.background = gradientColor;
+    }
+  }, [gradientPercentage, progress, start]);
 
   return (
     <div className="">
@@ -60,6 +90,7 @@ function CaptureForm() {
         <div className="table-parent">
           <table className="form-table">
             <thead>
+
               <tr>
                 <td>
                   <label>Name:</label>
@@ -75,6 +106,7 @@ function CaptureForm() {
               </tr>
             </thead>
             <tbody>
+
               <tr>
                 <td>
                   <label>Email:</label>
