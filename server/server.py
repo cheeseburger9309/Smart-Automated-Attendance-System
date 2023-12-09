@@ -170,6 +170,7 @@ def getdata():
         "unique_dates": list(unique_dates)
     }, 200
 
+
 @app.route('/attendance', methods=['POST'])
 def success():
     if request.method == 'POST':
@@ -432,4 +433,3 @@ def today_attendance():
 
 port = int(os.environ.get('PORT', 5000))
 app.run(debug=True, host='0.0.0.0', port=port)
-
