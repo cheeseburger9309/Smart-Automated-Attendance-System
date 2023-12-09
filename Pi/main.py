@@ -51,3 +51,38 @@ def send_attendance_request(stream):
     response = requests.post(
         'http://10.0.52.207:5000/attendance', files={'file': stream})
     return response
+
+def optimize_code():
+    try:
+        while True:
+            dist = measure_distance()
+            print("Distance: %.1f cm" % dist)
+
+            if 30 < dist < 100:
+                image_stream = capture_image()
+                response = send_attendance_request(image_stream)
+
+                if response.status_code == 200:
+                    GPIO.output(GREEN_LED_PIN, GPIO.HIGH)  # Turn on green LED
+                    GPIO.output(RED_LED_PIN, GPIO.LOW)  # Turn off red LED
+                    time.sleep(2)
+                else:
+                    GPIO.output(GREEN_LED_PIN, GPIO.LOW)  # Turn off green LED
+                    GPIO.output(RED_LED_PIN, GPIO.HIGH)  # Turn on red LED
+                    time.sleep(2)
+
+                GPIO.output(GREEN_LED_PIN, GPIO.LOW)
+                GPIO.output(RED_LED_PIN, GPIO.LOW)
+
+            time.sleep(1)
+
+    except KeyboardInterrupt:
+        print("Measurement stopped by User")
+
+    finally:
+        GPIO.cleanup()
+
+
+if __name__ == '__main__':
+    optimize_code()
+
