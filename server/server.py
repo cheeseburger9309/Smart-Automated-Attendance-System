@@ -169,3 +169,81 @@ def getdata():
         "ids": list(unique_ids),
         "unique_dates": list(unique_dates)
     }, 200
+
+@app.route('/attendance', methods=['POST'])
+def success():
+    if request.method == 'POST':
+        try:
+            f = request.files['file']
+            f.save('uploads/upload.jpg')
+            with open("recognizer/encode_id.p", "rb") as file:
+                encodeListwithIds = pickle.load(file)
+            encodeList, actualids = encodeListwithIds
+            img = detect('uploads/upload.jpg')
+            if img is None:
+                return {
+                    "message": "No face found"
+                }, 404
+            img = cv2.resize(img, (0, 0), None, 0.25, 0.25)
+            rimg = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            facesCurFrame = face_recognition.face_locations(rimg)
+            encodesCurFrame = face_recognition.face_encodings(
+                rimg, facesCurFrame)
+            for encodeFace, faceLoc in zip(encodesCurFrame, facesCurFrame):
+                matches = face_recognition.compare_faces(
+                    encodeList, encodeFace)
+                faceDis = face_recognition.face_distance(
+                    encodeList, encodeFace)
+                matchIndex = np.argmin(faceDis)
+
+                if matches[matchIndex]:
+                    id_ = actualids[matchIndex]
+                    conn = get_db_connection()
+                    result = conn.execute(
+                        'SELECT * FROM students WHERE student_id = ?', (id_,)).fetchone()
+
+                    if result is None:
+                        return {
+                            "message": "User not found"
+                        }, 404
+
+                    current_datetime = datetime.datetime.now()
+                    sqlite_date_format = current_datetime.strftime('%Y-%m-%d')
+                    student_id = result['student_id']
+
+                    result = conn.execute(
+                        'SELECT * FROM attendance WHERE student_id = ? AND date = ?', (
+                            student_id, sqlite_date_format)
+                    ).fetchone()
+
+                    if result is not None:
+                        return {
+                            "message": "Student attendance is already marked for student ID: " + str(student_id)
+                        }, 201
+
+                    conn.execute('INSERT INTO attendance (student_id, date) VALUES (?, ?)',
+                                 (student_id, sqlite_date_format))
+                    conn.commit()
+                    conn.close()
+
+                    return {
+                        "message": "Attendance marked successfully"
+                    }, 200
+                else:
+                    return {
+                        "message": "User not found"
+                    }, 404
+
+            return {
+                "message": "User not found"
+            }, 404
+        except:
+            return {
+                "message": "Internal server error"
+            }, 500
+    else:
+        return {
+            "message": "Invalid request"
+        }, 400
+
+
