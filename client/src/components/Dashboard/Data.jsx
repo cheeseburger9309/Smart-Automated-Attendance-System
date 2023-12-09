@@ -59,7 +59,13 @@ const Data = () => {
         }
     };
 
- 
+    // Calculate total presents for each date
+    const calculateTotalDatePresents = (dateIndex) => {
+        return data?.data.reduce((total, student) => {
+            return total + (student?.dates[dateIndex] ? 1 : 0);
+        }, 0);
+    };
+
     return (
         loading ? <Loading /> :
             <div className='data'>
