@@ -37,3 +37,13 @@
     color: #EBB02D;
 }
 
+.data-table tbody tr:last-of-type {
+    border-bottom: 2px solid #EBB02D;
+}
+
+.buttons-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+}
